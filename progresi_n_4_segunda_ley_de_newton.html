@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Progresión 4: Segunda Ley de Newton como Modelo Predictivo</title>
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --brand-primary: #2563eb;
+      --brand-primary-dark: #1d4ed8;
+      --brand-secondary: #0284c7;
+      --brand-accent: #d97706;
+      --color-success: #16a34a;
+      --color-error: #dc2626;
+      --border-color: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 30px;
+      user-select: none;
+    }
+
+    /* HEADER & BARRA DE PROGRESO */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 16px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .app-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-tag {
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #eff6ff;
+      color: var(--brand-primary-dark);
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #e2e8f0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .phase-indicator {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* LAYOUT CONTENEDOR */
+    .main-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* TARJETAS Y COMPONENTES */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #334155;
+    }
+
+    .highlight-box {
+      background-color: #f0f9ff;
+      border-left: 4px solid var(--brand-primary);
+      padding: 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+
+    .teacher-pause-box {
+      background-color: #fffbe2;
+      border: 2px dashed var(--brand-accent);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .teacher-pause-box h4 {
+      color: var(--brand-accent);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* BOTONES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      gap: 8px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-primary);
+      color: white;
+    }
+
+    .btn-primary:active {
+      background-color: var(--brand-primary-dark);
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:active {
+      background-color: #e2e8f0;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--brand-primary);
+      color: var(--brand-primary);
+    }
+
+    .btn:disabled {
+      background-color: #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border: none;
+      transform: none;
+    }
+
+    /* OPCIONES DE RESPUESTA / TÁCTIL */
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .option-btn {
+      padding: 12px 14px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: white;
+      text-align: left;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .option-btn.selected {
+      border-color: var(--brand-primary);
+      background-color: #eff6ff;
+      color: var(--brand-primary-dark);
+      font-weight: 600;
+    }
+
+    .option-btn.correct {
+      border-color: var(--color-success);
+      background-color: #ecfdf5;
+      color: var(--color-success);
+      font-weight: 600;
+    }
+
+    .option-btn.incorrect {
+      border-color: var(--color-error);
+      background-color: #fef2f2;
+      color: var(--color-error);
+    }
+
+    /* FEEDBACK */
+    .feedback-box {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      margin-top: 12px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .feedback-box.show {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .feedback-success {
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    .feedback-error {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    /* SIMULADOR DE LABORATORIO Y GRÁFICOS SVG */
+    .sim-container {
+      background-color: #0f172a;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      color: white;
+      margin: 12px 0;
+    }
+
+    .sim-canvas {
+      width: 100%;
+      height: 160px;
+      background: #1e293b;
+      border-radius: var(--radius-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sim-controls {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #475569;
+      outline: none;
+      accent-color: var(--brand-primary);
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .readout-item {
+      background: #334155;
+      padding: 6px 4px;
+      border-radius: var(--radius-sm);
+    }
+
+    .readout-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .readout-lbl {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    /* MAPA CONCEPTUAL TÁCTIL */
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding: 10px;
+      background: #f1f5f9;
+      border-radius: var(--radius-sm);
+      min-height: 50px;
+    }
+
+    .chip {
+      background: var(--brand-primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.1s;
+    }
+
+    .chip:active {
+      transform: scale(0.95);
+    }
+
+    .chip.selected {
+      background: var(--brand-accent);
+      outline: 2px solid #f59e0b;
+    }
+
+    .concept-slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .slot-row {
+      background: white;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .slot {
+      display: inline-block;
+      min-width: 110px;
+      height: 28px;
+      border-bottom: 2px dashed var(--brand-primary);
+      background-color: #f8fafc;
+      margin: 0 4px;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 26px;
+      font-weight: 700;
+      color: var(--brand-primary-dark);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .slot.filled {
+      border: 1px solid var(--brand-primary);
+      background-color: #eff6ff;
+    }
+
+    .slot.correct-slot {
+      border-color: var(--color-success);
+      background-color: #ecfdf5;
+      color: var(--color-success);
+    }
+
+    .slot.incorrect-slot {
+      border-color: var(--color-error);
+      background-color: #fef2f2;
+      color: var(--color-error);
+    }
+
+    /* INPUT ENTRADA DATOS */
+    .input-field {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      margin-top: 4px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--brand-primary);
+    }
+
+    /* GRID PREGUNTAS TEST */
+    .question-nav-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .q-dot {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .q-dot.active {
+      border: 2px solid var(--brand-primary);
+      color: var(--brand-primary);
+      background: white;
+    }
+
+    .q-dot.answered {
+      background: var(--brand-primary);
+      color: white;
+    }
+
+    /* EVIDENCIA CAPTURA FINAL (OPTIMIZADA PARA SMARTPHONE) */
+    .evidence-card {
+      background: #ffffff;
+      border: 3px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 16px;
+    }
+
+    .evidence-header {
+      background: var(--brand-primary);
+      color: white;
+      margin: -16px -16px 14px -16px;
+      padding: 12px;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .evidence-score {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--brand-primary);
+      line-height: 1;
+      margin: 8px 0;
+    }
+
+    .evidence-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .badge-excellent { background: #dcfce7; color: #15803d; }
+    .badge-good { background: #dbeafe; color: #1e40af; }
+    .badge-regular { background: #fef3c7; color: #b45309; }
+    .badge-retry { background: #fee2e2; color: #b91c1c; }
+
+    .evidence-details {
+      text-align: left;
+      font-size: 0.85rem;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      margin-top: 10px;
+    }
+
+    .evidence-details div {
+      margin-bottom: 4px;
+    }
+
+    /* ANIMACIONES */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO DE NAVEGACIÓN Y PROGRESO -->
+  <header>
+    <div class="header-top">
+      <div class="app-title">Física • Progresión 4</div>
+      <div id="user-display" class="user-tag hidden">Estudiante</div>
+    </div>
+    <div class="progress-container">
+      <div id="main-progress-bar" class="progress-bar"></div>
+    </div>
+    <div class="phase-indicator">
+      <span id="phase-label">Inicio</span>
+      <span id="progress-percent">0%</span>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DINÁMICO -->
+  <main class="main-container" id="app-content">
+    <!-- El contenido de cada fase se inyectará dinámicamente desde JS -->
+  </main>
+
+  <script>
+    // ESTADO GLOBAL DE LA APLICACIÓN (Single Source of Truth)
+    const state = {
+      phase: 0, // 0: Start, 1: Engage, 2: Explore, 3: Explain, 4: Elaborate, 5: Evaluate, 6: Results
+      studentName: '',
+      studentGroup: '',
+      engagePrediction: null,
+      engagePrediction2: null,
+      exploreMass: 2,
+      exploreForce: 10,
+      exploreFriction: 2,
+      rampAngle: 'low',
+      conceptMapSlots: { slot1: null, slot2: null, slot3: null, slot4: null, slot5: null },
+      selectedChip: null,
+      variablesAnswers: { dep: null, indep: null, ctrl: null },
+      misconceptionAnswers: {},
+      elaborateMissions: { m1: null, m2_a: '', m2_f: '', m2_m: '', m3: null, m4: null, m5: null },
+      evaluateCurrentQ: 0,
+      evaluateAnswers: Array(10).fill(null),
+      finalScore: 0,
+      finalReflection: '',
+      timestamp: ''
+    };
+
+    const EVALUATION_QUESTIONS = [
+      {
+        question: "1. ¿Qué establece la Segunda Ley de Newton como modelo predictivo?",
+        options: [
+          "A) A mayor masa, mayor será la aceleración para una misma fuerza.",
+          "B) La aceleración de un objeto es directamente proporcional a la fuerza neta e inversamente proporcional a su masa.",
+          "C) Los objetos se mueven solo si existe una fuerza neta igual a cero.",
+          "D) La fuerza siempre depende exclusivamente de la velocidad constante."
+        ],
+        correct: 1,
+        explanation: "a = ΣF / m indica que la aceleración aumenta con más fuerza neta y disminuye con más masa."
+      },
+      {
+        question: "2. Si aplicas una fuerza neta constante a un carrito y luego duplicas su masa, ¿qué ocurre con su aceleración?",
+        options: [
+          "A) Se duplica.",
+          "B) Permanecerá igual.",
+          "C) Se reduce a la mitad.",
+          "D) Aumenta al cuádruple."
+        ],
+        correct: 2,
+        explanation: "Al duplicar la masa (m) manteniendo la fuerza neta constante, la aceleración (a) se reduce a la mitad (inversamente proporcional)."
+      },
+      {
+        question: "3. Si sobre un caja de 4 kg actúa una fuerza neta de 12 N, ¿cuál es su aceleración?",
+        options: [
+          "A) 48 m/s²",
+          "B) 3 m/s²",
+          "C) 0.33 m/s²",
+          "D) 8 m/s²"
+        ],
+        correct: 1,
+        explanation: "a = ΣF / m = 12 N / 4 kg = 3 m/s²."
+      },
+      {
+        question: "4. ¿Qué significa que la Fuerza Neta (ΣF) sobre un cuerpo sea igual a cero?",
+        options: [
+          "A) Que el cuerpo obligatoriamente está detenido.",
+          "B) Que la aceleración es cero y su velocidad no cambia.",
+          "C) Que no actúan fuerzas sobre el cuerpo.",
+          "D) Que la masa del cuerpo se vuelve cero."
+        ],
+        correct: 1,
+        explanation: "Si ΣF = 0, la aceleración a = 0. El objeto mantiene su estado de reposo o movimiento a velocidad constante."
+      },
+      {
+        question: "5. En un experimento para investigar cómo la fuerza influye en la aceleración manteniendo la masa constante, la fuerza aplicada es la variable:",
+        options: [
+          "A) Dependiente.",
+          "B) Controlada.",
+          "C) Independiente.",
+          "D) Aleatoria."
+        ],
+        correct: 2,
+        explanation: "La variable independiente es la que manipulamos conscientemente (la fuerza)."
+      },
+      {
+        question: "6. ¿Por qué una predicción científica basada en la Segunda Ley de Newton puede diferir ligeramente del experimento real en el aula?",
+        options: [
+          "A) Porque la ley de Newton está equivocada.",
+          "B) Porque los modelos científicos simplifican la realidad e intervienen factores reales como la fricción.",
+          "C) Porque la masa cambia según la velocidad.",
+          "D) Porque las matemáticas no se aplican a objetos cotidianos."
+        ],
+        correct: 1,
+        explanation: "Los modelos simplifican condiciones ideales. En el mundo real, la fricción y imprecisiones de medición causan variaciones leves."
+      },
+      {
+        question: "7. Si aplicas una fuerza de 10 N hacia la derecha y la fricción es de 10 N hacia la izquierda, ¿cuál es la aceleración del objeto?",
+        options: [
+          "A) 0 m/s²",
+          "B) 1 m/s²",
+          "C) 10 m/s²",
+          "D) 20 m/s²"
+        ],
+        correct: 0,
+        explanation: "ΣF = 10 N - 10 N = 0 N. Por lo tanto, a = 0 N / m = 0 m/s²."
+      },
+      {
+        question: "8. Un camión de carga pesado requiere mayor fuerza para frenar con la misma desaceleración que un auto compacto porque:",
+        options: [
+          "A) Tiene menor masa y mayor aceleración.",
+          "B) A mayor masa, se requiere mayor fuerza neta para lograr el mismo cambio de velocidad (F = m·a).",
+          "C) El camión no experimenta fricción.",
+          "D) La masa no influye en el frenado."
+        ],
+        correct: 1,
+        explanation: "Fuerza necesaria F = m·a. A mayor masa 'm', mayor fuerza 'F' se necesita para lograr la misma desaceleración 'a'."
+      },
+      {
+        question: "9. ¿Qué se necesita fundamentalmente para validar o descartar una predicción científica?",
+        options: [
+          "A) Una opinión popular.",
+          "B) Evidencia empírica obtenida mediante observación y medición.",
+          "C) Memorizar la fórmula matemática.",
+          "D) Descartar la fricción por completo."
+        ],
+        correct: 1,
+        explanation: "El método científico exige evidencias recopiladas mediante experimentos medibles para verificar las predicciones."
+      },
+      {
+        question: "10. ¿Cuál es la unidad de medida estándar de la Fuerza en el Sistema Internacional?",
+        options: [
+          "A) Kilogramo (kg)",
+          "B) Metro por segundo cuadrado (m/s²)",
+          "C) Newton (N)",
+          "D) Joules (J)"
+        ],
+        correct: 2,
+        explanation: "El Newton (N) es la unidad de fuerza en el SI, equivalente a 1 kg·m/s²."
+      }
+    ];
+
+    function updateHeader() {
+      const uDisplay = document.getElementById('user-display');
+      const pBar = document.getElementById('main-progress-bar');
+      const pLabel = document.getElementById('phase-label');
+      const pPercent = document.getElementById('progress-percent');
+
+      if (state.studentName) {
+        uDisplay.textContent = `${state.studentName} (${state.studentGroup})`;
+        uDisplay.classList.remove('hidden');
+      }
+
+      const phasesLabels = [
+        "Inicio",
+        "1. ENGAGE (Enganchar)",
+        "2. EXPLORE (Explorar)",
+        "3. EXPLAIN (Explicar)",
+        "4. ELABORATE (Elaborar)",
+        "5. EVALUATE (Evaluar)",
+        "Resultado Final"
+      ];
+
+      const percentages = [0, 20, 40, 60, 80, 95, 100];
+
+      pLabel.textContent = phasesLabels[state.phase];
+      pBar.style.width = `${percentages[state.phase]}%`;
+      pPercent.textContent = `${percentages[state.phase]}%`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // FASE 0: START SCREEN
+    function renderStartScreen() {
+      state.phase = 0;
+      updateHeader();
+      const container = document.getElementById('app-content');
+      container.innerHTML = `
+        <div class="card">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <span style="font-size: 2.5rem;">⚙️🏎️</span>
+            <h2 style="color: var(--brand-primary); font-size: 1.3rem; margin-top: 6px;">LA ENERGÍA EN LOS PROCESOS DE LA VIDA DIARIA</h2>
+            <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-top: 4px;">PROGRESIÓN 4</h3>
+          </div>
+
+          <div class="highlight-box">
+            <strong>Idea Principal:</strong> La Segunda Ley de Newton es un modelo científico que permite predecir cambios en el movimiento de objetos macroscópicos.
+          </div>
+
+          <form id="start-form" onsubmit="handleStart(event)">
+            <div style="margin-bottom: 12px;">
+              <label style="font-weight: 600; font-size: 0.9rem;">Nombre Completo del Estudiante:</label>
+              <input type="text" id="input-name" class="input-field" placeholder="Ej. Juan Pérez García" required value="${escapeHtml(state.studentName)}">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <label style="font-weight: 600; font-size: 0.9rem;">Grupo / Semestre:</label>
+              <input type="text" id="input-group" class="input-field" placeholder="Ej. 201-A" required value="${escapeHtml(state.studentGroup)}">
+            </div>
+
+            <p style="font-size:0.8rem; color:var(--text-muted);">Escribe tu nombre completo y grupo para comenzar la actividad interactiva de 50 minutos.</p>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 12px;">
+              🚀 COMENZAR MI RECORRIDO
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    function handleStart(e) {
+      e.preventDefault();
+      const name = document.getElementById('input-name').value.trim();
+      const group = document.getElementById('input-group').value.trim();
+
+      if (!name || !group) {
+        alert("Por favor completa tu nombre y grupo antes de iniciar.");
+        return;
+      }
+
+      state.studentName = name;
+      state.studentGroup = group;
+      renderEngage();
+    }
+
+    // FASE 1: ENGAGE
+    function renderEngage() {
+      state.phase = 1;
+      updateHeader();
+      const container = document.getElementById('app-content');
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">🛒 FASE 1: ENGANCHAR — Reto de Predicción Inicial</div>
+          <p>Imagina que estás en el supermercado con dos carritos de compras idénticos:</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; text-align: center;">
+            <div style="background:#f1f5f9; padding:12px; border-radius:8px;">
+              <span style="font-size:2rem;">🛒</span>
+              <p style="font-weight:bold; margin-top:4px;">Carrito A</p>
+              <span style="font-size:0.8rem; color:#64748b;">Completamente Vacío</span>
+            </div>
+            <div style="background:#f1f5f9; padding:12px; border-radius:8px;">
+              <span style="font-size:2rem;">🛒📦📦</span>
+              <p style="font-weight:bold; margin-top:4px;">Carrito B</p>
+              <span style="font-size:0.8rem; color:#64748b;">Cargado con objetos</span>
+            </div>
+          </div>
+
+          <p><strong>Pregunta 1:</strong> Si aplicas <u>EXACTAMENTE LA MISMA FUERZA</u> de empuje a ambos carritos durante 3 segundos, ¿cuál acelerará más rápido?</p>
+
+          <div class="option-group">
+            <button class="option-btn ${state.engagePrediction === 'A' ? 'selected' : ''}" onclick="selectEngage('A')">
+              <span>A) El Carrito A (vacío) acelerará más rápido.</span>
+            </button>
+            <button class="option-btn ${state.engagePrediction === 'B' ? 'selected' : ''}" onclick="selectEngage('B')">
+              <span>B) El Carrito B (lleno) acelerará más rápido.</span>
+            </button>
+            <button class="option-btn ${state.engagePrediction === 'C' ? 'selected' : ''}" onclick="selectEngage('C')">
+              <span>C) Ambos acelerarán exactamente igual.</span>
+            </button>
+          </div>
+
+          <div id="engage-feedback-1" class="feedback-box"></div>
+        </div>
+
+        <div id="engage-part-2" class="card ${state.engagePrediction ? '' : 'hidden'}">
+          <p><strong>Pregunta 2:</strong> Si tomamos solo el Carrito A (vacío) y en un segundo intento le aplicas una <u>FUERZA MUCHO MAYOR</u>, ¿qué ocurrirá con su aceleración?</p>
+          
+          <div class="option-group">
+            <button class="option-btn ${state.engagePrediction2 === 'A2' ? 'selected' : ''}" onclick="selectEngage2('A2')">
+              <span>A) La aceleración disminuirá.</span>
+            </button>
+            <button class="option-btn ${state.engagePrediction2 === 'B2' ? 'selected' : ''}" onclick="selectEngage2('B2')">
+              <span>B) La aceleración aumentará.</span>
+            </button>
+            <button class="option-btn ${state.engagePrediction2 === 'C2' ? 'selected' : ''}" onclick="selectEngage2('C2')">
+              <span>C) La aceleración no cambiará.</span>
+            </button>
+          </div>
+
+          <div id="engage-feedback-2" class="feedback-box"></div>
+
+          <button id="btn-to-explore" class="btn btn-primary hidden" onclick="renderExplore()">
+            CONTINUAR A EXPLORAR (LABORATORIO) ➡️
+          </button>
+        </div>
+      `;
+
+      if (state.engagePrediction) showEngageFeedback1();
+      if (state.engagePrediction2) showEngageFeedback2();
+    }
+
+    function selectEngage(val) {
+      state.engagePrediction = val;
+      renderEngage();
+    }
+
+    function showEngageFeedback1() {
+      const fb = document.getElementById('engage-feedback-1');
+      if (!fb) return;
+      fb.classList.add('show');
+      if (state.engagePrediction === 'A') {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Excelente predicción!</strong> El carrito vacío tiene menor masa, por lo que experimenta mayor aceleración al recibir la misma fuerza.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 <strong>¡Ajustemos la predicción!</strong> El carrito cargado tiene más masa y opone mayor resistencia al cambio de movimiento. El carrito A (vacío) acelerará más.';
+      }
+    }
+
+    function selectEngage2(val) {
+      state.engagePrediction2 = val;
+      showEngageFeedback2();
+      document.getElementById('btn-to-explore').classList.remove('hidden');
+    }
+
+    function showEngageFeedback2() {
+      const fb = document.getElementById('engage-feedback-2');
+      if (!fb) return;
+      fb.classList.add('show');
+      if (state.engagePrediction2 === 'B2') {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Correcto!</strong> Al aumentar la fuerza sobre la misma masa, la aceleración aumenta de forma directamente proporcional.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 <strong>Recuerda:</strong> Más fuerza ejercida sobre la misma masa produce mayor aceleración.';
+      }
+    }
+
+    // FASE 2: EXPLORE (LABORATORIO VIRTUAL + RAMPA)
+    function renderExplore() {
+      state.phase = 2;
+      updateHeader();
+      const container = document.getElementById('app-content');
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">🧪 FASE 2: EXPLORAR — Laboratorio Virtual de Fuerza Neta</div>
+          <p>Experimenta variando los controles táctiles para comprobar cómo la masa, la fuerza y la fricción afectan la aceleración.</p>
+
+          <div class="sim-container">
+            <div class="sim-canvas" id="sim-canvas-box">
+              <svg id="sim-svg" width="100%" height="100%" viewBox="0 0 300 150">
+                <!-- Superficie de suelo -->
+                <line x1="0" y1="120" x2="300" y2="120" stroke="#64748b" stroke-width="4"/>
+                <line x1="0" y1="124" x2="300" y2="124" stroke="#475569" stroke-width="2" stroke-dasharray="8 8"/>
+                
+                <!-- Carrito SVG -->
+                <g id="svg-cart" transform="translate(100, 70)">
+                  <rect x="0" y="0" width="80" height="36" rx="6" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+                  <text id="svg-mass-text" x="40" y="22" fill="white" font-size="12" font-weight="bold" text-anchor="middle">2 kg</text>
+                  <!-- Ruedas -->
+                  <circle cx="18" cy="40" r="8" fill="#0f172a" stroke="#cbd5e1" stroke-width="2"/>
+                  <circle cx="62" cy="40" r="8" fill="#0f172a" stroke="#cbd5e1" stroke-width="2"/>
+                </g>
+
+                <!-- Vector Fuerza Aplicada (Rojo) -->
+                <g id="vector-fapp">
+                  <line id="line-fapp" x1="180" y1="88" x2="230" y2="88" stroke="#ef4444" stroke-width="4" marker-end="url(#arrow-red)"/>
+                  <text id="text-fapp" x="205" y="80" fill="#f87171" font-size="11" font-weight="bold" text-anchor="middle">F_app = 10N</text>
+                </g>
+
+                <!-- Vector Fricción (Amarillo) -->
+                <g id="vector-fric">
+                  <line id="line-fric" x1="100" y1="88" x2="70" y2="88" stroke="#f59e0b" stroke-width="4"/>
+                  <text id="text-fric" x="80" y="80" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">f = 2N</text>
+                </g>
+
+                <!-- Definición de flechas -->
+                <defs>
+                  <marker id="arrow-red" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+
+            <div class="readout-grid">
+              <div class="readout-item">
+                <div class="readout-lbl">FUERZA NETA (ΣF)</div>
+                <div id="readout-fnet" class="readout-val">8 N</div>
+              </div>
+              <div class="readout-item">
+                <div class="readout-lbl">MASA (m)</div>
+                <div id="readout-mass" class="readout-val">2 kg</div>
+              </div>
+              <div class="readout-item">
+                <div class="readout-lbl">ACELERACIÓN (a)</div>
+                <div id="readout-acc" class="readout-val">4.0 m/s²</div>
+              </div>
+            </div>
+
+            <div class="sim-controls">
+              <div class="control-row">
+                <div class="control-label">
+                  <span>Masa del objeto (m):</span>
+                  <strong id="lbl-mass-val">2 kg</strong>
+                </div>
+                <input type="range" id="slider-mass" min="1" max="10" step="1" value="${state.exploreMass}" oninput="updateSim()">
+              </div>
+
+              <div class="control-row">
+                <div class="control-label">
+                  <span>Fuerza Aplicada hacia la derecha (F):</span>
+                  <strong id="lbl-force-val">10 N</strong>
+                </div>
+                <input type="range" id="slider-force" min="0" max="30" step="1" value="${state.exploreForce}" oninput="updateSim()">
+              </div>
+
+              <div class="control-row">
+                <div class="control-label">
+                  <span>Fricción con la superficie (f):</span>
+                  <strong id="lbl-fric-val">2 N</strong>
+                </div>
+                <input type="range" id="slider-fric" min="0" max="10" step="1" value="${state.exploreFriction}" oninput="updateSim()">
+              </div>
+            </div>
+          </div>
+
+          <div class="teacher-pause-box">
+            <h4>🧑‍🏫 RETO DEL LABORATORIO</h4>
+            <p><strong>Configura:</strong> Fuerza Aplicada = 10 N y Fricción = 10 N.</p>
+            <p>¿Qué ocurre con la Fuerza Neta (ΣF) y la aceleración (a)?</p>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE LA RAMPA INTERACTIVA -->
+        <div class="card">
+          <div class="card-title">📐 Experimento Cualitativo: Plano Inclinado</div>
+          <p>Selecciona la inclinación de la rampa para observar cómo influye en la componente de la fuerza a lo largo del plano:</p>
+
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <button class="btn btn-secondary" onclick="setRamp('low')" style="flex:1;">Rampa Baja</button>
+            <button class="btn btn-secondary" onclick="setRamp('med')" style="flex:1;">Rampa Media</button>
+            <button class="btn btn-secondary" onclick="setRamp('high')" style="flex:1;">Rampa Alta</button>
+          </div>
+
+          <div style="background:#0f172a; border-radius:8px; padding:12px; text-align:center;">
+            <svg id="ramp-svg" width="100%" height="120" viewBox="0 0 300 120">
+              <polygon id="ramp-triangle" points="20,100 260,100 260,70" fill="#334155" stroke="#38bdf8" stroke-width="2"/>
+              <rect id="ramp-box" x="120" y="70" width="30" height="20" fill="#2563eb" transform="rotate(-7, 135, 80)"/>
+            </svg>
+            <div id="ramp-text" style="color:#cbd5e1; font-size:0.85rem; margin-top:4px;">Inclinación Baja: Menor fuerza efectiva hacia abajo.</div>
+          </div>
+
+          <button class="btn btn-primary" onclick="renderExplain()" style="margin-top:16px;">
+            IR A FASE 3: EXPLICAR (TEORÍA Y MAPA) ➡️
+          </button>
+        </div>
+      `;
+
+      updateSim();
+    }
+
+    function updateSim() {
+      const mass = parseInt(document.getElementById('slider-mass').value);
+      const force = parseInt(document.getElementById('slider-force').value);
+      const fric = parseInt(document.getElementById('slider-fric').value);
+
+      state.exploreMass = mass;
+      state.exploreForce = force;
+      state.exploreFriction = fric;
+
+      document.getElementById('lbl-mass-val').textContent = `${mass} kg`;
+      document.getElementById('lbl-force-val').textContent = `${force} N`;
+      document.getElementById('lbl-fric-val').textContent = `${fric} N`;
+
+      // Cálculos físicos reales
+      let fNet = force - fric;
+      if (fNet < 0) fNet = 0; // La fricción no mueve el objeto hacia atrás por sí sola
+      const acc = (fNet / mass).toFixed(2);
+
+      document.getElementById('readout-fnet').textContent = `${fNet} N`;
+      document.getElementById('readout-mass').textContent = `${mass} kg`;
+      document.getElementById('readout-acc').textContent = `${acc} m/s²`;
+      document.getElementById('svg-mass-text').textContent = `${mass} kg`;
+
+      // Actualizar gráficos SVG dinámicamente
+      const fAppLine = document.getElementById('line-fapp');
+      const fAppText = document.getElementById('text-fapp');
+      const fFricLine = document.getElementById('line-fric');
+      const fFricText = document.getElementById('text-fric');
+
+      const appLen = force * 2.5;
+      fAppLine.setAttribute('x2', 180 + appLen);
+      fAppText.setAttribute('x', 180 + appLen / 2);
+      fAppText.textContent = `F = ${force}N`;
+
+      const fricLen = fric * 2.5;
+      fFricLine.setAttribute('x2', 100 - fricLen);
+      fFricText.setAttribute('x', 100 - fricLen / 2);
+      fFricText.textContent = `f = ${fric}N`;
+    }
+
+    function setRamp(type) {
+      state.rampAngle = type;
+      const poly = document.getElementById('ramp-triangle');
+      const box = document.getElementById('ramp-box');
+      const txt = document.getElementById('ramp-text');
+
+      if (type === 'low') {
+        poly.setAttribute('points', '20,100 260,100 260,80');
+        box.setAttribute('transform', 'rotate(-5, 135, 85)');
+        txt.textContent = 'Inclinación Baja: Componente de fuerza gravitacional pequeña. Aceleración baja.';
+      } else if (type === 'med') {
+        poly.setAttribute('points', '20,100 260,100 260,50');
+        box.setAttribute('transform', 'rotate(-12, 135, 70)');
+        txt.textContent = 'Inclinación Media: Incrementa la componente de fuerza en la dirección de la rampa.';
+      } else {
+        poly.setAttribute('points', '20,100 260,100 260,20');
+        box.setAttribute('transform', 'rotate(-20, 135, 50)');
+        txt.textContent = 'Inclinación Alta: Gran fuerza efectiva a lo largo de la rampa. Mayor aceleración.';
+      }
+    }
+
+    // FASE 3: EXPLAIN
+    function renderExplain() {
+      state.phase = 3;
+      updateHeader();
+      const container = document.getElementById('app-content');
+
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">📖 FASE 3: EXPLICAR — La Segunda Ley de Newton</div>
+          
+          <div class="highlight-box">
+            <h4 style="color:var(--brand-primary); margin-bottom:4px;">Concepto Clave</h4>
+            <p style="margin:0;">La Segunda Ley de Newton no es solo una fórmula para sustituir datos. Es un <strong>modelo científico predictivo</strong> que establece:</p>
+            <div style="text-align:center; font-size:1.2rem; font-weight:bold; color:var(--brand-primary-dark); margin:8px 0;">
+              a = ΣF / m &nbsp;&nbsp; o &nbsp;&nbsp; ΣF = m · a
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px;">
+              <strong>1. Fuerza Neta (ΣF):</strong> Es la suma vectorial de todas las fuerzas actuantes. Si ΣF = 0, la aceleración es 0. Se mide en Newtons (N).
+            </div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px;">
+              <strong>2. Masa (m):</strong> Cantidad de materia e inercia de un objeto. A mayor masa, mayor resistencia a acelerar. Se mide en kilogramos (kg).
+            </div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px;">
+              <strong>3. Aceleración (a):</strong> Cambio de velocidad en el tiempo. Ocurre siempre en la misma dirección que la fuerza neta. Se mide en m/s².
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVIDAD IDENTIFICACIÓN DE VARIABLES -->
+        <div class="card">
+          <div class="card-title">🔍 Identificación de Variables Experimentales</div>
+          <p>Queremos investigar: <em>"¿Cómo afecta la masa a la aceleración cuando aplicamos siempre la misma fuerza?"</em></p>
+          
+          <div style="margin-bottom:10px;">
+            <label style="font-size:0.85rem; font-weight:bold;">Variable Independiente (Lo que cambiamos):</label>
+            <select id="var-indep" class="input-field" onchange="checkVariables()">
+              <option value="">-- Selecciona --</option>
+              <option value="fuerza">Fuerza Aplicada</option>
+              <option value="masa">Masa del carrito</option>
+              <option value="aceleracion">Aceleración</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label style="font-size:0.85rem; font-weight:bold;">Variable Dependiente (Lo que medimos u observamos):</label>
+            <select id="var-dep" class="input-field" onchange="checkVariables()">
+              <option value="">-- Selecciona --</option>
+              <option value="fuerza">Fuerza Aplicada</option>
+              <option value="masa">Masa del carrito</option>
+              <option value="aceleracion">Aceleración resultante</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label style="font-size:0.85rem; font-weight:bold;">Variable Controlada (Lo que mantenemos constante):</label>
+            <select id="var-ctrl" class="input-field" onchange="checkVariables()">
+              <option value="">-- Selecciona --</option>
+              <option value="fuerza">Fuerza Aplicada fija</option>
+              <option value="masa">Masa variante</option>
+              <option value="aceleracion">Aceleración cambiante</option>
+            </select>
+          </div>
+
+          <div id="var-feedback" class="feedback-box"></div>
+        </div>
+
+        <!-- MAPA CONCEPTUAL INTERACTIVO TÁCTIL -->
+        <div class="card">
+          <div class="card-title">🧩 Mapa Conceptual Interactivo</div>
+          <p>Toca una palabra del banco y luego toca el espacio en blanco donde debe colocarse:</p>
+
+          <div class="word-bank" id="word-bank-container">
+            <span class="chip" data-word="segunda ley" onclick="handleChipClick(this)">segunda ley</span>
+            <span class="chip" data-word="modelo" onclick="handleChipClick(this)">modelo</span>
+            <span class="chip" data-word="fuerza neta" onclick="handleChipClick(this)">fuerza neta</span>
+            <span class="chip" data-word="aceleracion" onclick="handleChipClick(this)">aceleración</span>
+            <span class="chip" data-word="friccion" onclick="handleChipClick(this)">fricción</span>
+          </div>
+
+          <div class="concept-slots-container">
+            <div class="slot-row">
+              La <span class="slot" id="slot1" onclick="handleSlotClick('slot1')"></span> es un 
+              <span class="slot" id="slot2" onclick="handleSlotClick('slot2')"></span> científico predictivo.
+            </div>
+            <div class="slot-row">
+              Relaciona la <span class="slot" id="slot3" onclick="handleSlotClick('slot3')"></span>, la masa y la 
+              <span class="slot" id="slot4" onclick="handleSlotClick('slot4')"></span>.
+            </div>
+            <div class="slot-row">
+              En el mundo real opone resistencia la <span class="slot" id="slot5" onclick="handleSlotClick('slot5')"></span>.
+            </div>
+          </div>
+
+          <button class="btn btn-secondary" onclick="checkConceptMap()" style="margin-top:12px;">
+            COMPROBAR MAPA CONCEPTUAL
+          </button>
+
+          <div id="concept-feedback" class="feedback-box"></div>
+        </div>
+
+        <div class="teacher-pause-box">
+          <h4>🧑‍🏫 PAUSA CON TU PROFESOR</h4>
+          <p>Comenta con tu profesor y compañeros: ¿Por qué en un experimento científico es indispensable cambiar una sola variable a la vez?</p>
+          <button class="btn btn-outline" style="margin-top:8px; background:white;" onclick="this.parentNode.style.background='#dcfce7'; this.innerText='✅ Discutido en Clase';">
+            YA LO COMENTAMOS — CONTINUAR
+          </button>
+        </div>
+
+        <button class="btn btn-primary" onclick="renderElaborate()" style="margin-top:12px;">
+          IR A FASE 4: ELABORAR (MISIONES Y CÁLCULOS) ➡️
+        </button>
+      `;
+
+      restoreConceptMapState();
+    }
+
+    function checkVariables() {
+      const dep = document.getElementById('var-dep').value;
+      const indep = document.getElementById('var-indep').value;
+      const ctrl = document.getElementById('var-ctrl').value;
+      const fb = document.getElementById('var-feedback');
+
+      if (!dep || !indep || !ctrl) return;
+
+      fb.classList.add('show');
+      if (indep === 'masa' && dep === 'aceleracion' && ctrl === 'fuerza') {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Correcto!</strong> Manipulamos la masa (Independiente), medimos la aceleración (Dependiente) y mantenemos constante la fuerza (Controlada).';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 <strong>Revisa tus opciones:</strong> La variable independiente es la que cambias (masa), la dependiente es la que mides (aceleración) y la controlada no cambia (fuerza).';
+      }
+    }
+
+    function handleChipClick(chipEl) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chipEl.classList.add('selected');
+      state.selectedChip = chipEl.getAttribute('data-word');
+    }
+
+    function handleSlotClick(slotId) {
+      if (state.conceptMapSlots[slotId]) {
+        // Liberar el chip devuelto al banco
+        const wordToRemove = state.conceptMapSlots[slotId];
+        state.conceptMapSlots[slotId] = null;
+        const chipEl = document.querySelector(`.chip[data-word="${wordToRemove}"]`);
+        if (chipEl) chipEl.classList.remove('hidden');
+        const slotEl = document.getElementById(slotId);
+        slotEl.textContent = '';
+        slotEl.classList.remove('filled', 'correct-slot', 'incorrect-slot');
+        return;
+      }
+
+      if (!state.selectedChip) return;
+
+      // Colocar chip seleccionado en la casilla
+      state.conceptMapSlots[slotId] = state.selectedChip;
+      const slotEl = document.getElementById(slotId);
+      slotEl.textContent = state.selectedChip;
+      slotEl.classList.add('filled');
+
+      const chipEl = document.querySelector(`.chip[data-word="${state.selectedChip}"]`);
+      if (chipEl) chipEl.classList.add('hidden');
+
+      state.selectedChip = null;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    }
+
+    function restoreConceptMapState() {
+      Object.keys(state.conceptMapSlots).forEach(slotId => {
+        const val = state.conceptMapSlots[slotId];
+        if (val) {
+          const slotEl = document.getElementById(slotId);
+          if (slotEl) {
+            slotEl.textContent = val;
+            slotEl.classList.add('filled');
+          }
+          const chipEl = document.querySelector(`.chip[data-word="${val}"]`);
+          if (chipEl) chipEl.classList.add('hidden');
+        }
+      });
+    }
+
+    function checkConceptMap() {
+      const solution = {
+        slot1: 'segunda ley',
+        slot2: 'modelo',
+        slot3: 'fuerza neta',
+        slot4: 'aceleracion',
+        slot5: 'friccion'
+      };
+
+      let correctCount = 0;
+      let total = 5;
+      let emptyCount = 0;
+
+      Object.keys(solution).forEach(slotId => {
+        const userVal = state.conceptMapSlots[slotId];
+        const slotEl = document.getElementById(slotId);
+        slotEl.classList.remove('correct-slot', 'incorrect-slot');
+
+        if (!userVal) {
+          emptyCount++;
+        } else if (userVal === solution[slotId]) {
+          correctCount++;
+          slotEl.classList.add('correct-slot');
+        } else {
+          slotEl.classList.add('incorrect-slot');
+        }
+      });
+
+      const fb = document.getElementById('concept-feedback');
+      fb.classList.add('show');
+
+      if (emptyCount > 0) {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = `⚠️ Te faltan ${emptyCount} espacios por completar.`;
+      } else if (correctCount === total) {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '🎉 ¡Excelente! Has completado correctamente todo el mapa conceptual.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = `💡 Tienes ${correctCount} de ${total} correctas. Toca las casillas marcadas en rojo para corregir.`;
+      }
+    }
+
+    // FASE 4: ELABORATE
+    function renderElaborate() {
+      state.phase = 4;
+      updateHeader();
+      const container = document.getElementById('app-content');
+
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">🎯 FASE 4: ELABORAR — Misiones Prácticas y Cálculos</div>
+          <p>Aplica la Segunda Ley de Newton como modelo predictivo en situaciones reales y numéricas.</p>
+        </div>
+
+        <!-- MISIÓN 1: PREDICCIÓN Y CÁLCULOS BREVES -->
+        <div class="card">
+          <div class="card-title">🧮 Misión 1: Cálculos Rápidos (ΣF = m · a)</div>
+          
+          <div style="margin-bottom:14px; background:#f8fafc; padding:10px; border-radius:8px;">
+            <p style="font-weight:bold; margin-bottom:4px;">Caso A: Una caja de 4 kg recibe una fuerza neta de 12 N.</p>
+            <p>¿Cuál es su aceleración?</p>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="number" id="calc-a" class="input-field" placeholder="Resultado" style="width:120px;" value="${state.elaborateMissions.m2_a}">
+              <span>m/s²</span>
+              <button class="btn btn-secondary" style="width:auto; margin:0;" onclick="checkCalc('a')">Verificar</button>
+            </div>
+            <div id="fb-calc-a" class="feedback-box"></div>
+          </div>
+
+          <div style="margin-bottom:14px; background:#f8fafc; padding:10px; border-radius:8px;">
+            <p style="font-weight:bold; margin-bottom:4px;">Caso B: Un carrito de 2 kg acelera a 3 m/s².</p>
+            <p>¿Qué fuerza neta actúa sobre él?</p>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="number" id="calc-f" class="input-field" placeholder="Resultado" style="width:120px;" value="${state.elaborateMissions.m2_f}">
+              <span>N</span>
+              <button class="btn btn-secondary" style="width:auto; margin:0;" onclick="checkCalc('f')">Verificar</button>
+            </div>
+            <div id="fb-calc-f" class="feedback-box"></div>
+          </div>
+        </div>
+
+        <!-- MISIÓN 2: MODELO VS REALIDAD -->
+        <div class="card">
+          <div class="card-title">🔍 Misión 2: El Modelo vs la Realidad</div>
+          <p>El modelo matemático predice que un carrito en una rampa tardará exactamente 2.0 segundos en llegar abajo. Al medirlo en la clase, tarda 2.3 segundos. ¿Significa esto que la ley de Newton está equivocada?</p>
+
+          <div class="option-group">
+            <button class="option-btn ${state.elaborateMissions.m4 === 'yes' ? 'selected' : ''}" onclick="selectM4('yes')">
+              <span>Sí, la ley es falsa porque no coincidió exactamente.</span>
+            </button>
+            <button class="option-btn ${state.elaborateMissions.m4 === 'no' ? 'selected' : ''}" onclick="selectM4('no')">
+              <span>No, porque los modelos ideales no consideran factores reales como la fricción y imprecisiones de medición.</span>
+            </button>
+          </div>
+          <div id="fb-m4" class="feedback-box"></div>
+        </div>
+
+        <!-- ACTIVIDAD EXPLICA EL ERROR -->
+        <div class="card">
+          <div class="card-title">🛑 Misión 3: Diagnostica y Corrige el Error</div>
+          <p>Analiza la siguiente afirmación muy común:</p>
+
+          <div class="highlight-box" style="border-left-color:var(--color-error);">
+            <em>"Si sobre un objeto no actúa ninguna fuerza neta, el objeto obligatoriamente tiene que estar completamente detenido."</em>
+          </div>
+
+          <p>¿Esta afirmación es Correcta o Incorrecta?</p>
+
+          <div class="option-group">
+            <button class="option-btn" onclick="checkMisconception(true)">Correcta</button>
+            <button class="option-btn" onclick="checkMisconception(false)">Incorrecta</button>
+          </div>
+          <div id="fb-misconception" class="feedback-box"></div>
+        </div>
+
+        <!-- MISIÓN 4: SEGURIDAD Y APLICACIÓN -->
+        <div class="card">
+          <div class="card-title">🚛 Misión 4: Aplicación en Seguridad Vial</div>
+          <p>Un camión de carga de 10,000 kg y un auto compacto de 1,000 kg viajan a la misma velocidad. Para lograr frenar ambos en la misma distancia (misma desaceleración):</p>
+          
+          <div class="option-group">
+            <button class="option-btn ${state.elaborateMissions.m5 === 'A' ? 'selected' : ''}" onclick="selectM5('A')">
+              <span>El camión requiere una fuerza de frenado 10 veces mayor.</span>
+            </button>
+            <button class="option-btn ${state.elaborateMissions.m5 === 'B' ? 'selected' : ''}" onclick="selectM5('B')">
+              <span>Ambos requieren exactamente la misma fuerza de frenado.</span>
+            </button>
+          </div>
+          <div id="fb-m5" class="feedback-box"></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="renderEvaluate()" style="margin-top:12px;">
+          IR A FASE 5: EVALUAR (CUESTIONARIO FINAL) ➡️
+        </button>
+      `;
+    }
+
+    function checkCalc(type) {
+      if (type === 'a') {
+        const val = parseFloat(document.getElementById('calc-a').value);
+        state.elaborateMissions.m2_a = val;
+        const fb = document.getElementById('fb-calc-a');
+        fb.classList.add('show');
+        if (val === 3) {
+          fb.className = 'feedback-box show feedback-success';
+          fb.innerHTML = '✅ ¡Correcto! a = 12 N / 4 kg = 3 m/s².';
+        } else {
+          fb.className = 'feedback-box show feedback-error';
+          fb.innerHTML = '💡 Recuerda dividir la Fuerza entre la Masa: a = ΣF / m.';
+        }
+      } else if (type === 'f') {
+        const val = parseFloat(document.getElementById('calc-f').value);
+        state.elaborateMissions.m2_f = val;
+        const fb = document.getElementById('fb-calc-f');
+        fb.classList.add('show');
+        if (val === 6) {
+          fb.className = 'feedback-box show feedback-success';
+          fb.innerHTML = '✅ ¡Correcto! ΣF = 2 kg · 3 m/s² = 6 N.';
+        } else {
+          fb.className = 'feedback-box show feedback-error';
+          fb.innerHTML = '💡 Recuerda multiplicar Masa por Aceleración: F = m · a.';
+        }
+      }
+    }
+
+    function selectM4(val) {
+      state.elaborateMissions.m4 = val;
+      const fb = document.getElementById('fb-m4');
+      fb.classList.add('show');
+      if (val === 'no') {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Excelente comprensión!</strong> Ningún modelo simplificado abarca absolutamente todo el rozamiento ni imprecisiones humanas del mundo real.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 Revisa: Las leyes físicas son modelos aproximados ideales. Las pequeñas diferencias reales se deben a la fricción e imprecisiones.';
+      }
+    }
+
+    function checkMisconception(isCorrect) {
+      const fb = document.getElementById('fb-misconception');
+      fb.classList.add('show');
+      if (!isCorrect) {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Correcto! Es INCORRECTA.</strong> Si la fuerza neta es cero, la aceleración es cero. Esto significa que el objeto puede estar en reposo O moviéndose a VELOCIDAD CONSTANTE.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 <strong>¡Atención!</strong> Si ΣF = 0, no hay aceleración, pero el objeto puede continuar moviéndose en línea recta a velocidad constante (Primera Ley / Inercia).';
+      }
+    }
+
+    function selectM5(val) {
+      state.elaborateMissions.m5 = val;
+      const fb = document.getElementById('fb-m5');
+      fb.classList.add('show');
+      if (val === 'A') {
+        fb.className = 'feedback-box show feedback-success';
+        fb.innerHTML = '✅ <strong>¡Correcto!</strong> Al tener 10 veces más masa, F = m·a exige 10 veces más fuerza para lograr la misma aceleración de frenado.';
+      } else {
+        fb.className = 'feedback-box show feedback-error';
+        fb.innerHTML = '💡 Recuerda F = m·a. Mayor masa requiere proporcionalmente mayor fuerza.';
+      }
+    }
+
+    // FASE 5: EVALUATE (EVALUACIÓN FINAL)
+    function renderEvaluate() {
+      state.phase = 5;
+      updateHeader();
+      const container = document.getElementById('app-content');
+      const qIndex = state.evaluateCurrentQ;
+      const qData = EVALUATION_QUESTIONS[qIndex];
+
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-title">📝 FASE 5: EVALUAR — Cuestionario de Comprobación</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">Responde las 10 preguntas. Puedes navegar entre ellas antes de entregar.</p>
+
+          <!-- GRID DE INDICADORES NAVEGACIÓN -->
+          <div class="question-nav-grid">
+            ${EVALUATION_QUESTIONS.map((_, idx) => `
+              <div class="q-dot ${idx === qIndex ? 'active' : ''} ${state.evaluateAnswers[idx] !== null ? 'answered' : ''}" onclick="goToQuestion(${idx})">
+                ${idx + 1}
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:8px; margin-bottom:12px;">
+            <p style="font-weight:bold; font-size:1rem; color:var(--text-main);">${qData.question}</p>
+          </div>
+
+          <div class="option-group">
+            ${qData.options.map((opt, optIdx) => `
+              <button class="option-btn ${state.evaluateAnswers[qIndex] === optIdx ? 'selected' : ''}" onclick="selectEvalAnswer(${qIndex}, ${optIdx})">
+                <span>${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="btn btn-secondary" onclick="prevQuestion()" ${qIndex === 0 ? 'disabled' : ''}>
+              ⬅️ Anterior
+            </button>
+            <button class="btn btn-secondary" onclick="nextQuestion()" ${qIndex === EVALUATION_QUESTIONS.length - 1 ? 'disabled' : ''}>
+              Siguiente ➡️
+            </button>
+          </div>
+
+          <div style="margin-top:16px; border-top:1px solid #e2e8f0; padding-top:12px;">
+            <button class="btn btn-primary" onclick="submitEvaluation()">
+              🏁 ENTREGAR MI EVALUACIÓN
+            </button>
+            <div id="eval-warning" class="feedback-box"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectEvalAnswer(qIdx, optIdx) {
+      state.evaluateAnswers[qIdx] = optIdx;
+      renderEvaluate();
+    }
+
+    function goToQuestion(idx) {
+      state.evaluateCurrentQ = idx;
+      renderEvaluate();
+    }
+
+    function prevQuestion() {
+      if (state.evaluateCurrentQ > 0) {
+        state.evaluateCurrentQ--;
+        renderEvaluate();
+      }
+    }
+
+    function nextQuestion() {
+      if (state.evaluateCurrentQ < EVALUATION_QUESTIONS.length - 1) {
+        state.evaluateCurrentQ++;
+        renderEvaluate();
+      }
+    }
+
+    function submitEvaluation() {
+      const unanswered = [];
+      state.evaluateAnswers.forEach((ans, idx) => {
+        if (ans === null) unanswered.push(idx + 1);
+      });
+
+      const warnBox = document.getElementById('eval-warning');
+
+      if (unanswered.length > 0) {
+        warnBox.classList.add('show');
+        warnBox.className = 'feedback-box show feedback-error';
+        warnBox.innerHTML = `⚠️ Todavía faltan ${unanswered.length} pregunta(s) por responder: <strong>Pregunta(s) ${unanswered.join(', ')}</strong>.`;
+        return;
+      }
+
+      // Calcular Calificación Final
+      let correct = 0;
+      state.evaluateAnswers.forEach((ans, idx) => {
+        if (ans === EVALUATION_QUESTIONS[idx].correct) {
+          correct++;
+        }
+      });
+
+      state.finalScore = correct;
+      const now = new Date();
+      state.timestamp = now.toLocaleDateString('es-MX') + ' ' + now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+      renderResults();
+    }
+
+    // FASE 6: RESULTS / EVIDENCIA FINAL (OPTIMIZADA PARA SMARTPHONE)
+    function renderResults() {
+      state.phase = 6;
+      updateHeader();
+      const container = document.getElementById('app-content');
+
+      const pct = (state.finalScore / 10) * 100;
+      let badgeText = "EXCELENTE";
+      let badgeClass = "badge-excellent";
+      let summaryMsg = "Demuestra dominio sólido de la Segunda Ley de Newton como modelo predictivo.";
+
+      if (pct < 60) {
+        badgeText = "REQUIERE REFORZAMIENTO";
+        badgeClass = "badge-retry";
+        summaryMsg = "Es recomendable repasar la relación entre Fuerza, Masa y Aceleración.";
+      } else if (pct < 80) {
+        badgeText = "BUENO";
+        badgeClass = "badge-regular";
+        summaryMsg = "Comprende los conceptos principales. Puede profundizar en factores de fricción.";
+      } else if (pct < 100) {
+        badgeText = "MUY BUENO";
+        badgeClass = "badge-good";
+        summaryMsg = "Excelente desempeño en la mayoría de predicciones y cálculos.";
+      }
+
+      container.innerHTML = `
+        <!-- BLOQUE COMPACTO DE EVIDENCIA PARA CAPTURA -->
+        <div class="evidence-card" id="screenshot-area">
+          <div class="evidence-header">
+            <h3 style="font-size:1.1rem; margin:0;">EVIDENCIA DE APRENDIZAJE</h3>
+            <p style="font-size:0.8rem; margin:0; opacity:0.9;">Progresión 4 • Física de Bachillerato</p>
+          </div>
+
+          <div style="text-align:left; font-size:0.9rem; margin-bottom:8px;">
+            <div><strong>Estudiante:</strong> ${escapeHtml(state.studentName)}</div>
+            <div><strong>Grupo:</strong> ${escapeHtml(state.studentGroup)}</div>
+            <div><strong>Asignatura:</strong> La energía en los procesos de la vida diaria</div>
+            <div><strong>Tema:</strong> Segunda Ley de Newton como Modelo Predictivo</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><strong>Fecha/Hora:</strong> ${state.timestamp}</div>
+          </div>
+
+          <div class="evidence-score">${state.finalScore} / 10</div>
+          <div style="font-weight:bold; color:var(--text-muted); font-size:0.9rem;">PORCENTAJE DE APROVECHAMIENTO: ${pct}%</div>
+          
+          <div style="margin-top:6px;">
+            <span class="evidence-badge ${badgeClass}">${badgeText}</span>
+          </div>
+
+          <p style="font-size:0.8rem; color:#475569; margin:4px 0;">${summaryMsg}</p>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px; font-size:0.8rem; text-align:left; margin-top:8px;">
+            📸 <strong>Instrucción:</strong> Toma una captura de pantalla de esta tarjeta y envíala a tu profesor como evidencia.
+          </div>
+        </div>
+
+        <!-- CAMPO DE REFLEXIÓN FINAL -->
+        <div class="card">
+          <div class="card-title">💭 Reflexión Final</div>
+          <p style="font-size:0.85rem;">En una frase breve, ¿qué aprendiste hoy sobre cómo la Segunda Ley de Newton nos permite hacer predicciones?</p>
+          <textarea id="final-reflection-text" class="input-field" rows="2" placeholder="Escribe tu reflexión aquí...">${escapeHtml(state.finalReflection)}</textarea>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="saveReflection()">GUARDAR REFLEXIÓN</button>
+        </div>
+
+        <!-- BOTÓN VER DETALLES DE RESPUESTAS -->
+        <div class="card">
+          <button class="btn btn-outline" onclick="toggleAnswerReview()">
+            🔍 REVISAR MIS RESPUESTAS DETALLADAS
+          </button>
+
+          <div id="review-section" class="hidden" style="margin-top:16px;">
+            <h4 style="margin-bottom:12px; font-size:1rem; color:var(--text-main);">Desglose del Cuestionario:</h4>
+            ${EVALUATION_QUESTIONS.map((q, idx) => {
+              const userAns = state.evaluateAnswers[idx];
+              const isCorrect = userAns === q.correct;
+              return `
+                <div style="padding:10px; margin-bottom:10px; border-radius:6px; background:${isCorrect ? '#f0fdf4' : '#fef2f2'}; border:1px solid ${isCorrect ? '#bbf7d0' : '#fecaca'}; font-size:0.85rem;">
+                  <p style="font-weight:bold; margin-bottom:4px;">${q.question}</p>
+                  <p><strong>Tu respuesta:</strong> ${userAns !== null ? q.options[userAns] : 'Sin responder'} ${isCorrect ? '✅' : '❌'}</p>
+                  ${!isCorrect ? `<p style="color:#059669;"><strong>Respuesta correcta:</strong> ${q.options[q.correct]}</p>` : ''}
+                  <p style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;"><em>Explicación:</em> ${q.explanation}</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function saveReflection() {
+      const txt = document.getElementById('final-reflection-text').value.trim();
+      state.finalReflection = txt;
+      alert("¡Reflexión guardada correctamente!");
+    }
+
+    function toggleAnswerReview() {
+      const rev = document.getElementById('review-section');
+      if (rev) {
+        rev.classList.toggle('hidden');
+      }
+    }
+
+    // INICIALIZACIÓN DE LA APLICACIÓN
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStartScreen();
+    });
+  </script>
+</body>
+</html>
